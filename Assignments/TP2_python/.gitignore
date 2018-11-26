@@ -1,0 +1,11 @@
+__pycache__
+
+movielens/ml-1m/
+
+movielens/.ipynb_checkpoints
+
+movielens/*.csv
+
+.idea
+
+*.zip
