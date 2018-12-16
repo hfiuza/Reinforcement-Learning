@@ -1,0 +1,110 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{algorithm} % http://ctan.org/pkg/algorithms
+\usepackage{algpseudocode} % http://ctan.org/pkg/algorithmicx
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+
+\title{Homework 3 - Reinforcement Learning with Function Approximation}
+
+\author{Henrique Gasparini Fiuza do Nascimento}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+In this report, we explore the reinforcement learning with function approximation, using both policy gradient methods and value function approximation methods. We also explore the on-policy and the off-policy paradigms.
+
+\end{abstract}
+
+\section{On-Policy Reinforcement Learning with Parametric Policy}
+\label{sec:first_exercise}
+
+\textbf{Question 1}: Q1: Implement \texttt{REINFORCE} with Gaussian policy model.
+
+We start considering the case of fixed standard deviation $\sigma_{\omega}(s) = 0.4$. The only parameter to learn is the parametrization of the mean $\mu = \theta s$. Consider the classical gradient updated in (1) and try to play with the value of $\alpha_t$ (constant or an annealing schema or adaptive technique). In order to evaluate the performance during the learning process plot $t \rightarrow \theta_t$. Try to play with the different parameters $(N , T , \sigma_{\omega} , . . .)$ and pick the best result. Show also confidence intervals around the curves.
+
+Even in this simple domain may be hard to find the correct configuration for all the parameters of the algorithm. Can you \textbf{explain} a little bit the effect of the parameters $\alpha_t$ (in the case of standard update rule (1)) and $N$ ?
+
+\textit{Note:} that to have a significant result you should average multiple experiments (you can just average over several runs of fixed number of iterations). In addition, consider that the optimal parameter θ∗ has been computed considering zero as standard deviation (deterministic policy).
+
+\paragraph{•}
+\textit{Answer}: we first fix $N = 100$, $T = 200$, and $discount = 0.9$. We then vary the learning rate and study the convergence for each value in $0.1$, $0.01$, $0.001$, $10^{-4}$, $10^{-5}$.
+
+We observe in figures \ref{fig:average_returns_multiple_learning_rates} and \ref{fig:average_returns_multiple_learning_rates_without} that the returns for learning rates $0.1$ and $0.01$ are very unstable, while for $10^{-4}$ and $10^{-5}$ they increase along with the number of iterations.
+
+\begin{figure}
+\caption{\label{fig:average_returns_multiple_learning_rates} Average returns of REINFORCE for multiple learning rates}
+\centering
+\includegraphics[width=1\textwidth]{../img/average_returns_multiple_learning_rates.png}
+\end{figure}
+
+\begin{figure}
+\caption{\label{fig:average_returns_multiple_learning_rates_without} Average returns of REINFORCE for learning rates excluding 0.1}
+\centering
+\includegraphics[width=1\textwidth]{../img/average_returns_multiple_learning_rates_without.png}
+\end{figure}
+
+We also looked at the distance to the optimal value for $\theta$. We remark in figure
+\ref{fig:theta_distance_clipped_at_10_multiple_learning_rates} that there is convergence only for learning rate $10^{-4}$ and $10^{-5}$. We also remark in figure \ref{fig:theta_distance_clipped_at_10_multiple_learning_rates_only} that the convergence is quite slow for $10^{-5}$ but happens and is slightly more stable. We should still prefer a learning rate equal to $10^{-4}$.
+
+\begin{figure}
+\caption{\label{fig:theta_distance_clipped_at_10_multiple_learning_rates} Distance to optimal $\theta$ when running REINFORCE for multiple learning rates}
+\centering
+\includegraphics[width=1\textwidth]{../img/theta_distance_clipped_at_10_multiple_learning_rates.png}
+\end{figure}
+
+\begin{figure}
+\caption{\label{fig:theta_distance_clipped_at_10_multiple_learning_rates_only} Distance to optimal $\theta$ when running REINFORCE for learning rates $10^{-4}$ and $10^{-5}$ and $2000$ iterations}
+\centering
+\includegraphics[width=1\textwidth]{../img/theta_distance_clipped_at_10_multiple_learning_rates_only.png}
+\end{figure}
+
+The result is quite expected. For learning rates greater than a certain value ($10^{-4}$, the convergence is too unstable and does not happen in some cases. For learning rates smaller than this value, the convergence happens but is too slow.
+
+The second part of the analysis concerns the number of samples. We fixed the learning rate as $10^{-4}$ and tested $10$, $20$, $50$, and $100$ samples.
+
+We observe in figures \ref{fig:average_returns_multiple_samples_numbers} that the average returns when using more samples is larger. This is probably due to the fact that when using less samples we do not explore some states with very negative rewards.
+
+\begin{figure}
+\caption{\label{fig:average_returns_multiple_samples_numbers} Average returns of REINFORCE for $10$, $20$, $50$, and $100$ samples}
+\centering
+\includegraphics[width=1\textwidth]{../img/average_returns_multiple_learning_numbers_of_samples.png}
+\end{figure}
+
+\textit{Remark:} In these analyses, we ran each algorithm a single time. A more rigorous approach should run more times but unfortunately we started working too late and were constrained to the deadline time.
+
+\textbf{Question 2}: Implement REINFORCE with exploration bonus and test it on the LQR domain.
+\paragraph{•}
+\textit{Answer}:
+
+Figures \ref{fig:exploration_bonus_average_returns} and \ref{fig:exploration_bonus_theta_distance} show the results of plotting the standard version against the adapted version of the REINFORCE algorithm using exploration bonus using $\Beta$ in $1.$, $0.1$, and $0.01$.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{../img/average_returns_multiple_betas.png}
+\caption{\label{fig:exploration_bonus_average_returns} Average returns of REINFORCE with and without ($Beta = None$) exploration bonus}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{../img/theta_distance_clipped_at_10_multiple_betas.png}
+\caption{\label{fig:exploration_bonus_theta_distance} Average returns of REINFORCE with and without ($Beta = None$) exploration bonus}
+\end{figure}
+
+We observe that a smaller value of $\Beta$ ($0.01$) produces a parameter $\theta$ that is closer to the optimal one. This happens because larger bonuses slow down the learning algorithm, leading to worse results in a finite time. It certainly could be worth exploring even smaller values.
+
+Additionally, the average returns are very similar for these parameters and there is no clear winner.
+
+It should be mentioned that this time we averaged our results over $10$ runs for each parameter possible values, so our results are more meaningful.
+
+\end{document}
